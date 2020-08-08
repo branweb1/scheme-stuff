@@ -150,3 +150,4 @@
           (rest xs))]))
 
 (my-reduce (lambda (acc a) (+ acc a)) 0 '(10 20 30))
+
