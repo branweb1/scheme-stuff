@@ -1,7 +1,7 @@
 #lang racket
 (require 2htdp/universe 2htdp/image)
 
-(struct bounds [lower upper])
+(struct bounds [lower upper guesses])
 (define TEXT_SIZE 16)
 (define HELP1
   (text "↑ if number is higher, ↓ if it's lower"
@@ -30,18 +30,20 @@
 
 (define (higher state)
   (bounds (min (bounds-upper state) (add1 (guess state)))
-          (bounds-upper state)))
+          (bounds-upper state)
+          (add1 (bounds-guesses state))))
 
 (define (lower state)
   (bounds (bounds-lower state)
-          (max (bounds-lower state) (sub1 (guess state)))))
+          (max (bounds-lower state) (sub1 (guess state)))
+          (add1 (bounds-guesses state))))
 
 
 (define (handle-draw state)
   (overlay
-   (text (number->string (guess state))
-         TEXT_SIZE
-         COLOR)
+   (above (text (number->string (guess state)) TEXT_SIZE COLOR)
+          (text (string-append "Guesses: " (number->string (bounds-guesses state)))
+                TEXT_SIZE COLOR))
    BG))
 
 (define (render-last-scene state)
@@ -62,7 +64,7 @@
         [else state]))
 
 (define (start m n)
-  (big-bang (bounds (min m n) (max m n))
+  (big-bang (bounds (min m n) (max m n) 1)
             [on-key handle-key]
             [to-draw handle-draw]
             [stop-when single? render-last-scene]))
