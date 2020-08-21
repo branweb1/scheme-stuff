@@ -54,6 +54,16 @@
         (list-ref CATEGORIES idx)
         (get-category vendor))))
 
+;; loads csv file
+;; makes set of vendors therein
+;; prompts user to categorize each vendor
+;; builds a hash (VENDOR => CATEGORY) e.g. Chick-fil-a => food
+
+;; needs to query db for each vendor
+;; if unknown, then prompt user and add to hash
+;; otherwise don't prompt
+;; when hash is build, use it to update the database
+;; should either generate a report or add budget info to db
 (for-each
  (lambda (vendor)
    (let ([cat (get-category vendor)])
@@ -66,3 +76,10 @@
 ;; make script with cmd line option for file...
 ;; or make csv reader read from std in and just use
 ;; shell redirects
+
+;; VENDORS (name text, cat_id int)
+;; CATEGORIES (name text)
+;; 1 CAT has many VENDORS
+;; consider making CATEGORY an enum type rather than a table
+
+
