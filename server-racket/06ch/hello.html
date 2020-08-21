@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Hello</title>
+</head>
+<body>
+  <p>Hello, @|name|.</p>
+@when[(string=? name "brandon")
+  @include-template["great.html"]
+]
+</body>
+</html>

@@ -1,0 +1,11 @@
+<h1>Produce In Stock:</h1>
+<ul>
+@in[product products]{
+  @(define name (product-name product))
+  @(define sku (product-sku product))
+  @(define price (real->decimal-string
+                   (product-price product)
+                    2))
+  <li>@|name| - @|price| - <a href="@|name|">view</a></li>
+}
+</ul>

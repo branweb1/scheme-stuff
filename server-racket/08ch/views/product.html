@@ -1,0 +1,11 @@
+@(define name (product-name product))
+@(define sku (product-sku product))
+@(define button-class "add-to-cart")
+<div>
+  <h3>@|name|</h3>
+  <p>Count: @|qty|</p>
+  <button id="@|button-class|">Add to Cart</button>
+</div>
+<script>
+ @(include-template "../script.js")
+</script>
