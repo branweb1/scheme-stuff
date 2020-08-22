@@ -42,9 +42,9 @@
 (define CATEGORIES
   '("food"
     "transportation"
-    "books"
+    "learning"
     "home"
-    "person"
+    "recurring"
     "other"))
 
 (define VENDOR_CATEGORIES (make-hash))
@@ -126,13 +126,23 @@
 
 ;; convert rows to list of lists and remove headers
 (define rows
-  (rest (csv->list (reader (open-input-file "data.csv")))))
+  (rest (csv->list (reader (open-input-file "data-new.csv")))))
 
 ;; payments/credits show as postive amounts so filter them out
 (define (filter-payments xxs)
   (filter
    (lambda (xs)
      (negative? (string->number (list-ref xs 5))))
+   xxs))
+
+(define (filter-category xxs cat)
+  (filter
+   (lambda (xs)
+     (not (equal?
+           cat
+           (hash-ref
+            existing-vendor-categories
+            (list-ref xs VENDOR_IDX)))))
    xxs))
 
 (define (filter-known-vendors vendors)
@@ -205,7 +215,7 @@
          pgdb
          "SELECT id FROM vendors WHERE name = $1"
          vendor))))
-   (filter-payments rows)))
+   (filter-category (filter-payments rows) "recurring")))
 
 ;; MAIN
 (define (main)
