@@ -2,7 +2,8 @@
 
 (require csv-reading
          db
-         racket/hash)
+         racket/hash
+         racket/cmdline)
 
 ;; Takes a csv of credit card transactions
 
@@ -28,10 +29,11 @@
 
 ;; It writes the transaction with the looked-up category to the db
 
-;; TODO: allow it to take file as cmd line arg
 ;; TODO: figure out how to ensure we don't record duplicate transactions
 ;; TODO: how to categorize generic vendors like amazon
-;; TODO: split out recurring expenses (could add a flag to the db table)
+;; DONE: split out recurring expenses - omit to write them using category in the vendors table
+;;       but this is wrong, recurrence is a property of a transaction. A non-recurring expense
+;;       from a vendor tagged as "recurring" is now omitted, which is a bug.
 
 ;; HELPERS
 (define (format-amt n)
@@ -124,9 +126,14 @@
 (define (reader in)
   (make-csv-reader in))
 
+(define filename
+  (command-line
+   #:args (filename)
+   filename))
+
 ;; convert rows to list of lists and remove headers
 (define rows
-  (rest (csv->list (reader (open-input-file "data-new.csv")))))
+  (rest (csv->list (reader (open-input-file filename)))))
 
 ;; payments/credits show as postive amounts so filter them out
 (define (filter-payments xxs)
@@ -226,6 +233,3 @@
   (write-transactions))
 
 (main)
-
-
-
