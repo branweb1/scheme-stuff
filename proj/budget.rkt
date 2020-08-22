@@ -1,7 +1,12 @@
 #lang racket
 
 (require csv-reading
-         db)
+         db
+         racket/hash)
+
+;; HELPERS
+(define (format-amt n)
+  (* -1 (string->number n)))
 
 ;; CONSTANTS
 (define VENDOR_IDX 2)
@@ -72,8 +77,19 @@
       vendor
       (query-value pgdb "SELECT id FROM categories WHERE name = $1" cat)))))
 
+(define existing-vendor-categories
+  (make-hash
+   (map
+    (lambda (row)
+      (cons (vector-ref row 0)
+            (vector-ref row 1)))
+    (query-rows
+     pgdb
+     (string-append "SELECT v.name, c.name FROM vendors v "
+                    "JOIN categories c ON c.id = v.category_id")))))
+
 (define known-vendors
-  (query-list pgdb "SELECT name FROM vendors"))
+  (hash-keys existing-vendor-categories))
 
 ;; PARSING
 (define (reader in)
@@ -140,16 +156,37 @@
        (hash-set! VENDOR_CATEGORIES vendor cat)))
    (get-unique-vendors (extract-vendors))))
 
-;; categorize and add transactions to database
-;; make script with cmd line option for file...
-;; or make csv reader read from std in and just use
-;; shell redirects
+;; RECORDING TRANSACTIONS
+(define (write-transactions)
+  (for-each
+   (lambda (row)
+     (let* ([vendor (list-ref row 2)]
+            [category (hash-ref existing-vendor-categories vendor)]
+            [amt (format-amt (list-ref row 5))]
+            [post-date (list-ref row 1)])
+       (query-exec
+        pgdb
+        (string-append
+         "INSERT INTO transactions "
+         "(trans_amt, trans_date, vendor_id) "
+         "VALUES ($1, to_date($2, 'MM/DD/YYYY'), $3)")
+        amt
+        post-date
+        (query-value
+         pgdb
+         "SELECT id FROM vendors WHERE name = $1"
+         vendor))))
+   (filter-payments rows)))
 
+;; MAIN
 (define (main)
   (bootstrap-db)
   (categorize-vendors)
-  (insert-vendors))
+  (insert-vendors)
+  (hash-union! existing-vendor-categories VENDOR_CATEGORIES)
+  (write-transactions))
 
 (main)
+
 
 
