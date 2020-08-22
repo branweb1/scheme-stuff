@@ -4,6 +4,35 @@
          db
          racket/hash)
 
+;; Takes a csv of credit card transactions
+
+;; Loads all vendors in the db into an in-memory hash table
+
+;; Compares vendors in csv against those in the hash table
+
+;; If it alread knows about the vendor, it does not prompt the user
+
+;; If it finds a vendor it doesn't know about, it prompts the user
+;; to assign the vendor a predefined category. This is beceause
+;; the cc company is bad at categorizing vendors. It collects the
+;; users choices in a separate hash table
+
+;; It then writes the user-assigned categories in the hash table
+;; back to the db.
+
+;; It combines the original table with the new one. This combo should
+;; reflect the state of the db vendors table
+
+;; It goes through transactions in csv file, looking up category in the
+;; hash table.
+
+;; It writes the transaction with the looked-up category to the db
+
+;; TODO: allow it to take file as cmd line arg
+;; TODO: figure out how to ensure we don't record duplicate transactions
+;; TODO: how to categorize generic vendors like amazon
+;; TODO: split out recurring expenses (could add a flag to the db table)
+
 ;; HELPERS
 (define (format-amt n)
   (* -1 (string->number n)))
